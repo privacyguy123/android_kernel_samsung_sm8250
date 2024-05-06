@@ -28,6 +28,10 @@
 #include <asm/tlbflush.h>
 #include "internal.h"
 
+#if defined(CONFIG_KSU) && defined(CONFIG_KSU_SUSFS)
+#include <linux/susfs.h>
+#endif
+
 #ifdef CONFIG_ZRAM_LRU_WRITEBACK
 #include <linux/delay.h>
 #include "../../drivers/block/zram/zram_drv.h"
@@ -387,6 +391,10 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 	unsigned long start, end;
 	dev_t dev = 0;
 	const char *name = NULL;
+#if defined(CONFIG_KSU) && defined(CONFIG_KSU_SUSFS)
+	char tmpname[SUSFS_MAX_LEN_PATHNAME];
+	int ret = 0;
+#endif
 
 	if (file) {
 		struct inode *inode = file_inode(vma->vm_file);
@@ -397,8 +405,21 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 
 	start = vma->vm_start;
 	end = vma->vm_end;
+
+#if defined(CONFIG_KSU) && defined(CONFIG_KSU_SUSFS)
+    ret = susfs_sus_maps(ino, &ino, &dev, &flags, &pgoff, vma, tmpname);
+#endif
+
 	show_vma_header_prefix(m, start, end, flags, pgoff, dev, ino);
 
+#if defined(CONFIG_KSU) && defined(CONFIG_KSU_SUSFS)
+	if (ret == 2) {
+		seq_pad(m, ' ');
+		seq_puts(m, tmpname);
+		seq_putc(m, '\n');
+		return;
+	}
+#endif
 	/*
 	 * Print the dentry name for named mappings, and a
 	 * special [heap] marker for the heap:

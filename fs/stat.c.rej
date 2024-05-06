@@ -1,0 +1,13 @@
+--- fs/stat.c
++++ fs/stat.c
+@@ -18,6 +18,10 @@
+ #include <asm/uaccess.h>
+ #include <asm/unistd.h>
+ 
++#if defined(CONFIG_KSU) && defined(CONFIG_KSU_SUSFS)
++#include <linux/susfs.h>
++#endif
++
+ void generic_fillattr(struct inode *inode, struct kstat *stat)
+ {
+ 	stat->dev = inode->i_sb->s_dev;

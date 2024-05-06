@@ -1,0 +1,16 @@
+--- fs/namei.c
++++ fs/namei.c
+@@ -4762,6 +4883,13 @@ SYSCALL_DEFINE5(renameat2, int, olddfd, const char __user *, oldname,
+ 		goto exit;
+ 	}
+ 
++#if defined(CONFIG_KSU) && defined(CONFIG_KSU_SUSFS)
++	status = susfs_sus_path_by_filename(from, &error, SYSCALL_FAMILY_RENAMEAT2_OLDNAME);
++	if (status) {
++		goto exit;
++	}
++#endif
++
+ 	to = user_path_parent(newdfd, newname,
+ 				&new_path, &new_last, &new_type, lookup_flags);
+ 	if (IS_ERR(to)) {
