@@ -407,7 +407,7 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 	end = vma->vm_end;
 
 #if defined(CONFIG_KSU) && defined(CONFIG_KSU_SUSFS)
-    ret = susfs_sus_maps(ino, &ino, &dev, &flags, &pgoff, vma, tmpname);
+    ret = susfs_sus_maps(ino, end - start, &ino, &dev, &flags, &pgoff, vma, tmpname);
 #endif
 
 	show_vma_header_prefix(m, start, end, flags, pgoff, dev, ino);
